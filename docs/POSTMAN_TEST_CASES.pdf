@@ -1,0 +1,364 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 4 /Kids [ 8 0 R 9 0 R 10 0 R 11 0 R ] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 1931 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+(Postman Test Cases - Request Processor) Tj
+0 -14 Td
+0 -14 Td
+(How to use) Tj
+0 -14 Td
+(- Base URL: http://localhost:3000) Tj
+0 -14 Td
+(- Common headers: Content-Type: application/json, Idempotency-Key: <unique>) Tj
+0 -14 Td
+0 -14 Td
+(1\) Create Request \(Happy Path\)) Tj
+0 -14 Td
+(POST /requests) Tj
+0 -14 Td
+(Headers: Idempotency-Key: happy-1) Tj
+0 -14 Td
+(Body:) Tj
+0 -14 Td
+({) Tj
+0 -14 Td
+("payload": { "order_id": "A-100", "amount": 4999 }) Tj
+0 -14 Td
+(}) Tj
+0 -14 Td
+(Expected: 202 Accepted, status: pending) Tj
+0 -14 Td
+(Then: GET /requests/:id until status is completed) Tj
+0 -14 Td
+0 -14 Td
+(2\) Duplicate Request \(Same Key + Same Payload\)) Tj
+0 -14 Td
+(POST /requests) Tj
+0 -14 Td
+(Headers: Idempotency-Key: dup-1) Tj
+0 -14 Td
+(Body: { "payload": { "order_id": "A-200" } }) Tj
+0 -14 Td
+(Repeat same request) Tj
+0 -14 Td
+(Expected: 202 Accepted \(or 200 if already complete\), no duplicate processing) Tj
+0 -14 Td
+0 -14 Td
+(3\) Conflict \(Same Key + Different Payload\)) Tj
+0 -14 Td
+(POST /requests) Tj
+0 -14 Td
+(Headers: Idempotency-Key: conflict-1) Tj
+0 -14 Td
+(Body: { "payload": { "order_id": "A-300" } }) Tj
+0 -14 Td
+(POST /requests with same key and different payload) Tj
+0 -14 Td
+(Body: { "payload": { "order_id": "A-999" } }) Tj
+0 -14 Td
+(Expected: 409 Conflict) Tj
+0 -14 Td
+0 -14 Td
+(4\) Retryable Failure) Tj
+0 -14 Td
+(POST /requests) Tj
+0 -14 Td
+(Headers: Idempotency-Key: retry-1) Tj
+0 -14 Td
+(Body:) Tj
+0 -14 Td
+({) Tj
+0 -14 Td
+("payload": {) Tj
+0 -14 Td
+("order_id": "A-400",) Tj
+0 -14 Td
+("simulate": { "failure_mode": "retryable" }) Tj
+0 -14 Td
+(}) Tj
+0 -14 Td
+(}) Tj
+0 -14 Td
+(Expected: 202 Accepted) Tj
+0 -14 Td
+(GET /requests/:id shows retrying, attempts increase, final status failed after max) Tj
+0 -14 Td
+(attempts) Tj
+0 -14 Td
+0 -14 Td
+(5\) Flaky Failure \(Fails then Succeeds\)) Tj
+0 -14 Td
+(POST /requests) Tj
+0 -14 Td
+(Headers: Idempotency-Key: flaky-1) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Length 1673 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+(Body:) Tj
+0 -14 Td
+({) Tj
+0 -14 Td
+("payload": {) Tj
+0 -14 Td
+("order_id": "A-500",) Tj
+0 -14 Td
+("simulate": { "failure_mode": "flaky", "failures_before_success": 2 }) Tj
+0 -14 Td
+(}) Tj
+0 -14 Td
+(}) Tj
+0 -14 Td
+(Expected: retrying for first 2 attempts, then completed) Tj
+0 -14 Td
+0 -14 Td
+(6\) Non-Retryable Failure) Tj
+0 -14 Td
+(POST /requests) Tj
+0 -14 Td
+(Headers: Idempotency-Key: nonretry-1) Tj
+0 -14 Td
+(Body:) Tj
+0 -14 Td
+({) Tj
+0 -14 Td
+("payload": {) Tj
+0 -14 Td
+("order_id": "A-600",) Tj
+0 -14 Td
+("simulate": { "failure_mode": "non_retryable" }) Tj
+0 -14 Td
+(}) Tj
+0 -14 Td
+(}) Tj
+0 -14 Td
+(Expected: status failed, no retry) Tj
+0 -14 Td
+0 -14 Td
+(7\) Slow Processing + Cancel) Tj
+0 -14 Td
+(POST /requests) Tj
+0 -14 Td
+(Headers: Idempotency-Key: slow-1) Tj
+0 -14 Td
+(Body:) Tj
+0 -14 Td
+({) Tj
+0 -14 Td
+("payload": {) Tj
+0 -14 Td
+("order_id": "A-700",) Tj
+0 -14 Td
+("simulate": { "delay_seconds": 10 }) Tj
+0 -14 Td
+(}) Tj
+0 -14 Td
+(}) Tj
+0 -14 Td
+(Immediately POST /requests/:id/cancel) Tj
+0 -14 Td
+(Expected: status cancelled) Tj
+0 -14 Td
+0 -14 Td
+(8\) Cancel After Completion) Tj
+0 -14 Td
+(Create a normal request, wait until completed, then cancel) Tj
+0 -14 Td
+(POST /requests/:id/cancel) Tj
+0 -14 Td
+(Expected: 409 Conflict) Tj
+0 -14 Td
+0 -14 Td
+(9\) Bad Request - Missing Idempotency-Key) Tj
+0 -14 Td
+(POST /requests \(no Idempotency-Key header\)) Tj
+0 -14 Td
+(Expected: 400 Bad Request) Tj
+0 -14 Td
+0 -14 Td
+(10\) Bad Request - Invalid Payload Type) Tj
+0 -14 Td
+(POST /requests) Tj
+0 -14 Td
+(Headers: Idempotency-Key: bad-1) Tj
+0 -14 Td
+(Body: { "payload": "not-an-object" }) Tj
+0 -14 Td
+(Expected: 400 Bad Request) Tj
+0 -14 Td
+ET
+endstream
+endobj
+6 0 obj
+<< /Length 2463 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+0 -14 Td
+(11\) Concurrency Test \(Same Key\)) Tj
+0 -14 Td
+(Send 10 requests concurrently with same Idempotency-Key and same payload) Tj
+0 -14 Td
+(Expected: no duplicates, one record only) Tj
+0 -14 Td
+0 -14 Td
+(12\) Status Check) Tj
+0 -14 Td
+(GET /requests/:id) Tj
+0 -14 Td
+(Expected: 200 OK, returns current status and timestamps) Tj
+0 -14 Td
+0 -14 Td
+(Curl Commands \(copy/paste\)) Tj
+0 -14 Td
+0 -14 Td
+(Happy path) Tj
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -H) Tj
+0 -14 Td
+("Idempotency-Key: happy-1"   -d '{"payload":{"order_id":"A-100","amount":4999}}') Tj
+0 -14 Td
+0 -14 Td
+(Check status) Tj
+0 -14 Td
+(curl -i http://localhost:3000/requests/<ID>) Tj
+0 -14 Td
+0 -14 Td
+(Cancel) Tj
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests/<ID>/cancel) Tj
+0 -14 Td
+0 -14 Td
+(Duplicate \(same key + same payload\)) Tj
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -H) Tj
+0 -14 Td
+("Idempotency-Key: dup-1"   -d '{"payload":{"order_id":"A-200"}}') Tj
+0 -14 Td
+0 -14 Td
+(Conflict \(same key + different payload\)) Tj
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -H) Tj
+0 -14 Td
+("Idempotency-Key: conflict-1"   -d '{"payload":{"order_id":"A-300"}}') Tj
+0 -14 Td
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -H) Tj
+0 -14 Td
+("Idempotency-Key: conflict-1"   -d '{"payload":{"order_id":"A-999"}}') Tj
+0 -14 Td
+0 -14 Td
+(Retryable failure) Tj
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -H) Tj
+0 -14 Td
+("Idempotency-Key: retry-1"   -d) Tj
+0 -14 Td
+('{"payload":{"order_id":"A-400","simulate":{"failure_mode":"retryable"}}}') Tj
+0 -14 Td
+0 -14 Td
+(Flaky failure) Tj
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -H) Tj
+0 -14 Td
+("Idempotency-Key: flaky-1"   -d) Tj
+0 -14 Td
+('{"payload":{"order_id":"A-500","simulate":{"failure_mode":"flaky","failures_before_success":2}}}') Tj
+0 -14 Td
+0 -14 Td
+(Non-retryable failure) Tj
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -H) Tj
+0 -14 Td
+("Idempotency-Key: nonretry-1"   -d) Tj
+0 -14 Td
+('{"payload":{"order_id":"A-600","simulate":{"failure_mode":"non_retryable"}}}') Tj
+0 -14 Td
+0 -14 Td
+(Slow processing + cancel) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Length 759 >>
+stream
+BT
+/F1 10 Tf
+54 738 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -H) Tj
+0 -14 Td
+("Idempotency-Key: slow-1"   -d) Tj
+0 -14 Td
+('{"payload":{"order_id":"A-700","simulate":{"delay_seconds":10}}}') Tj
+0 -14 Td
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests/<ID>/cancel) Tj
+0 -14 Td
+0 -14 Td
+(Missing idempotency key) Tj
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -d) Tj
+0 -14 Td
+('{"payload":{"order_id":"A-800"}}') Tj
+0 -14 Td
+0 -14 Td
+(Invalid payload type) Tj
+0 -14 Td
+(curl -i -X POST http://localhost:3000/requests   -H "Content-Type: application/json"   -H) Tj
+0 -14 Td
+("Idempotency-Key: bad-1"   -d '{"payload":"not-an-object"}') Tj
+0 -14 Td
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000137 00000 n 
+0000000207 00000 n 
+0000002190 00000 n 
+0000003915 00000 n 
+0000006430 00000 n 
+0000007240 00000 n 
+0000007366 00000 n 
+0000007492 00000 n 
+0000007619 00000 n 
+trailer
+<< /Size 12 /Root 1 0 R >>
+startxref
+7746
+%%EOF

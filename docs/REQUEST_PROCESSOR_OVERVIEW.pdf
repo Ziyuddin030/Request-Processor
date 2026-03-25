@@ -1,0 +1,183 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 2 /Kids [ 6 0 R 7 0 R ] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 2648 >>
+stream
+BT
+/F1 12 Tf
+54 738 Td
+(Request Processor - Plain-Language Overview) Tj
+0 -14 Td
+0 -14 Td
+(What this system does \(in simple words\)) Tj
+0 -14 Td
+(- You send a request to the server using an API.) Tj
+0 -14 Td
+(- The server saves your request in a database and immediately replies, so you are not kept) Tj
+0 -14 Td
+(waiting.) Tj
+0 -14 Td
+(- A background worker processes the request later.) Tj
+0 -14 Td
+(- You can check the status anytime or cancel it if it is still running.) Tj
+0 -14 Td
+0 -14 Td
+(Why this design) Tj
+0 -14 Td
+(- It prevents the same request from being processed twice.) Tj
+0 -14 Td
+(- It handles failures safely and retries only when it makes sense.) Tj
+0 -14 Td
+(- It works correctly even if many requests arrive at the same time.) Tj
+0 -14 Td
+0 -14 Td
+(Main building blocks) Tj
+0 -14 Td
+0 -14 Td
+(1\) API Controller \(ProcessingRequestsController\)) Tj
+0 -14 Td
+(- This is the front door.) Tj
+0 -14 Td
+(- It checks your request, ensures you provided an Idempotency-Key, and sends back a) Tj
+0 -14 Td
+(response.) Tj
+0 -14 Td
+(- It returns friendly errors if something is wrong \(missing data, bad JSON, etc.\).) Tj
+0 -14 Td
+0 -14 Td
+(2\) Database Model \(ProcessingRequest\)) Tj
+0 -14 Td
+(- This is the record stored in the database.) Tj
+0 -14 Td
+(- It keeps the request data, status, attempts, timestamps, and any errors.) Tj
+0 -14 Td
+(- Status values: pending, processing, retrying, completed, failed, cancelled.) Tj
+0 -14 Td
+0 -14 Td
+(3\) Idempotency Service \(RequestSubmission\)) Tj
+0 -14 Td
+(- This makes sure the same Idempotency-Key is not used twice with different data.) Tj
+0 -14 Td
+(- If the same key is used with the same payload, it does not create duplicates.) Tj
+0 -14 Td
+0 -14 Td
+(4\) Background Job \(ProcessRequestJob\)) Tj
+0 -14 Td
+(- This is the worker that processes requests in the background.) Tj
+0 -14 Td
+(- It locks the database row so two workers cannot process the same request.) Tj
+0 -14 Td
+(- It retries only for retryable errors and stops for non-retryable ones.) Tj
+0 -14 Td
+0 -14 Td
+(5\) Processor \(RequestProcessing::Processor\)) Tj
+0 -14 Td
+(- This is the core business logic.) Tj
+0 -14 Td
+(- It simulates real work and can intentionally fail in different ways for testing.) Tj
+0 -14 Td
+0 -14 Td
+(6\) Error Types \(RequestProcessingErrors\)) Tj
+0 -14 Td
+(- RetryableError: something temporary, should retry.) Tj
+0 -14 Td
+(- NonRetryableError: permanent failure, do not retry.) Tj
+0 -14 Td
+0 -14 Td
+(7\) JSON Hashing \(CanonicalJson\)) Tj
+0 -14 Td
+(- Ensures the payload is hashed in a consistent way.) Tj
+0 -14 Td
+(- This is how we detect "same key, different payload".) Tj
+0 -14 Td
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Length 1400 >>
+stream
+BT
+/F1 12 Tf
+54 738 Td
+(What cases we covered) Tj
+0 -14 Td
+(- Duplicate requests with the same Idempotency-Key) Tj
+0 -14 Td
+(- Same Idempotency-Key with different payload \(conflict\)) Tj
+0 -14 Td
+(- Retryable failures with controlled retries) Tj
+0 -14 Td
+(- Non-retryable failures without retry) Tj
+0 -14 Td
+(- Cancellation while processing) Tj
+0 -14 Td
+(- Concurrency and race conditions) Tj
+0 -14 Td
+(- Slow processing and long-running jobs) Tj
+0 -14 Td
+0 -14 Td
+(HTTP responses you will see) Tj
+0 -14 Td
+(- 202 Accepted: request saved and queued) Tj
+0 -14 Td
+(- 200 OK: request completed or already known) Tj
+0 -14 Td
+(- 400 Bad Request: missing or invalid input) Tj
+0 -14 Td
+(- 409 Conflict: same idempotency key used with different payload) Tj
+0 -14 Td
+(- 500 Internal Server Error: unexpected server issue) Tj
+0 -14 Td
+0 -14 Td
+(Principles we followed) Tj
+0 -14 Td
+(- SOLID: clear responsibilities for controller, service, job, and processor) Tj
+0 -14 Td
+(- ACID: database constraints and row locks keep data safe) Tj
+0 -14 Td
+(- DRY: shared logic for hashing and serialization) Tj
+0 -14 Td
+(- COC: standard Rails structure) Tj
+0 -14 Td
+0 -14 Td
+(How it helps in real life) Tj
+0 -14 Td
+(- You never process the same request twice.) Tj
+0 -14 Td
+(- Users can safely retry calls without creating duplicates.) Tj
+0 -14 Td
+(- The system keeps working even if parts fail temporarily.) Tj
+0 -14 Td
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000123 00000 n 
+0000000193 00000 n 
+0000002893 00000 n 
+0000004345 00000 n 
+0000004471 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+4597
+%%EOF
